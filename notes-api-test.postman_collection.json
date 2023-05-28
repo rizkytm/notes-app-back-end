@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "139bfda5-a2d7-4dd9-9050-d93edea370d4",
-		"name": "Notes API Test",
+		"name": "notes-api-test",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "5138523"
 	},
@@ -371,6 +371,132 @@
 							"path": [
 								"users",
 								"xxxx"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Users by Username Related to Dicoding",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Menambahkan user dengan username dicoding",
+									"const addDicodingUserRequest = {",
+									"    method: 'POST',",
+									"    url: 'http://localhost:5000/users',",
+									"    header: {",
+									"        'Content-Type': 'application/json',",
+									"    },",
+									"    body: {",
+									"        mode: 'raw',",
+									"        raw: JSON.stringify({",
+									"            username: 'dicoding',",
+									"            password: pm.environment.get('newPassword'),",
+									"            fullname: 'Dicoding',",
+									"        }),",
+									"    },",
+									"};",
+									" ",
+									"pm.sendRequest(addDicodingUserRequest, (error, response) => {",
+									"    console.log(error ? error : response);",
+									"});",
+									" ",
+									"// menambahkan user dengan username \"dicoding_indonesia\"",
+									"const addDicodingIndonesiaUserRequest = {",
+									"    method: 'POST',",
+									"    url: 'http://localhost:5000/users',",
+									"    header: {",
+									"        'Content-Type': 'application/json',",
+									"    },",
+									"    body: {",
+									"        mode: 'raw',",
+									"        raw: JSON.stringify({",
+									"            username: 'dicoding_indonesia',",
+									"            password: pm.environment.get('newPassword'),",
+									"            fullname: 'Dicoding Indonesia',",
+									"        }),",
+									"    },",
+									"};",
+									" ",
+									"pm.sendRequest(addDicodingIndonesiaUserRequest, (error, response) => {",
+									"    console.log(error ? error : response);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status should be 200', () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									" ",
+									"pm.test('response Content-Type header should have application/json value', () => {",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');",
+									"});",
+									" ",
+									"pm.test('response body should an object', () => {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.be.an('object');",
+									"});",
+									" ",
+									"pm.test('response body should have correct property and value', () => {",
+									"    const responseJson = pm.response.json();",
+									" ",
+									"    pm.expect(responseJson).to.have.ownProperty('status');",
+									"    pm.expect(responseJson.status).to.equals('success');",
+									"    pm.expect(responseJson).to.have.ownProperty('data');",
+									"    pm.expect(responseJson.data).to.be.an('object');",
+									"});",
+									" ",
+									"pm.test('response body data should contain users array', () => {",
+									"    const { data } = pm.response.json();",
+									" ",
+									"    pm.expect(data).to.have.ownProperty('users');",
+									"    pm.expect(data.users).to.be.an('array');",
+									"});",
+									" ",
+									"pm.test('the array users should have contain 2 user object related to dicoding username', () => {",
+									"    const { data: { users } } = pm.response.json();",
+									" ",
+									"    pm.expect(users).to.have.lengthOf(2);",
+									" ",
+									"    users.forEach((user) => {",
+									"        pm.expect(user).to.be.an('object');",
+									"        pm.expect(user).to.have.ownProperty('id');",
+									"        pm.expect(user).to.have.ownProperty('username');",
+									"        pm.expect(user).to.have.ownProperty('fullname');",
+									"        pm.expect(user.username).to.include('dicoding');",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/users?username=dicoding",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "username",
+									"value": "dicoding"
+								}
 							]
 						}
 					},
@@ -1065,43 +1191,15 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test('response status code should have 200 value', () => {",
-									"  pm.response.to.have.status(200);",
-									"}); ",
-									"",
-									"pm.test('response Content-Type header should have application/json value', () => {",
-									"   pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');",
-									"});",
-									"",
-									"pm.test('response body should be an object', () => {",
-									"   const responseJson = pm.response.json();",
-									"   pm.expect(responseJson).to.be.an('object');",
-									"});",
-									"",
-									"pm.test('response body should have the correct property and value', () => {",
-									"   const responseJson = pm.response.json();",
-									" ",
-									"   pm.expect(responseJson).to.have.ownProperty('status');",
-									"   pm.expect(responseJson.status).to.equals('success');",
-									"   pm.expect(responseJson).to.have.ownProperty('data');",
-									"   pm.expect(responseJson.data).to.be.an('object');",
-									"}); ",
-									"",
-									"pm.test('response body data should contain note object', () => {",
-									"   const responseJson = pm.response.json();",
-									"   const { data } = responseJson;",
-									" ",
-									"   pm.expect(data).to.have.ownProperty('note');",
-									"   pm.expect(data.note).to.be.an('object');",
-									"}); ",
-									"",
-									"pm.test('note object should contain correct value for id, title, body, and tags property', () => {",
+									"pm.test('note object should contain correct value for id, title, body, tags, and username property', () => {",
 									"   const responseJson = pm.response.json();",
 									"   const { data: { note } } = responseJson;",
+									" ",
 									"   const expectedId = pm.environment.get('noteId');",
 									"   const expectedTitle = 'Catatan A';",
 									"   const expectedTags = ['Android', 'Web'];",
 									"   const expectedBody = 'Isi dari catatan A';",
+									" ",
 									"   pm.expect(note).to.have.ownProperty('id');",
 									"   pm.expect(note.id).to.equals(expectedId);",
 									"   pm.expect(note).to.have.ownProperty('title');",
@@ -1110,6 +1208,8 @@
 									"   pm.expect(note.tags).to.eql(expectedTags);",
 									"   pm.expect(note).to.have.ownProperty('body');",
 									"   pm.expect(note.body).to.equals(expectedBody);",
+									"   pm.expect(note).to.have.ownProperty('username');",
+									"   pm.expect(note.username).to.be.a('string');",
 									"});"
 								],
 								"type": "text/javascript"
@@ -2629,7 +2729,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/notes/{{ownerNoteId}}\n",
+							"raw": "http://localhost:5000/notes/{{ownerNoteId}}",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -2637,7 +2737,7 @@
 							"port": "5000",
 							"path": [
 								"notes",
-								"{{ownerNoteId}}\n"
+								"{{ownerNoteId}}"
 							]
 						}
 					},
